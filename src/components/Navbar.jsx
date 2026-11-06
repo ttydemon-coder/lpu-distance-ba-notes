@@ -11,7 +11,8 @@ import {
   Lock,
   X,
   Github,
-  ExternalLink
+  ExternalLink,
+  Sparkles
 } from 'lucide-react';
 
 export default function Navbar({ 
@@ -124,6 +125,18 @@ export default function Navbar({
             >
               <GraduationCap className="w-3.5 h-3.5" />
               Syllabus
+            </button>
+
+            <button
+              onClick={() => setCurrentTab('extras')}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
+                currentTab === 'extras' 
+                  ? 'bg-purple-500/15 text-purple-600 dark:text-purple-400 font-bold' 
+                  : 'text-slate-600 dark:text-slate-300 hover:bg-stone-100 dark:hover:bg-slate-800'
+              }`}
+            >
+              <Sparkles className="w-3.5 h-3.5 text-purple-500" />
+              Extras
             </button>
 
             <button

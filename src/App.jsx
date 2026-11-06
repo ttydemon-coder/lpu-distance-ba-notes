@@ -7,6 +7,8 @@ import PdfViewerModal from './components/PdfViewerModal';
 import UploadModal from './components/UploadModal';
 import AdminAuthModal from './components/AdminAuthModal';
 import SyllabusGuide from './components/SyllabusGuide';
+import ExtrasSection from './components/ExtrasSection';
+import UploadExtraModal from './components/UploadExtraModal';
 import Footer from './components/Footer';
 
 import { SUBJECTS_LIST, CATEGORIES_LIST } from './data/initialNotes';
@@ -22,12 +24,13 @@ export default function App() {
   const [activeCategory, setActiveCategory] = useState('All Types');
   const [availabilityFilter, setAvailabilityFilter] = useState('all'); // 'all' | 'available' | 'missing'
   const [searchQuery, setSearchQuery] = useState('');
-  const [currentTab, setCurrentTab] = useState('library'); // 'library' | 'syllabus' | 'bookmarks'
+  const [currentTab, setCurrentTab] = useState('library'); // 'library' | 'syllabus' | 'extras' | 'bookmarks'
   
   const [bookmarks, setBookmarks] = useState([]);
   const [previewNote, setPreviewNote] = useState(null);
   const [uploadModalOpen, setUploadModalOpen] = useState(false);
   const [uploadInitialData, setUploadInitialData] = useState(null);
+  const [uploadExtraOpen, setUploadExtraOpen] = useState(false);
   const [adminAuthOpen, setAdminAuthOpen] = useState(false);
 
   // Admin access state: only the owner with the passcode can upload
@@ -389,6 +392,17 @@ export default function App() {
           />
         )}
 
+        {currentTab === 'extras' && (
+          <ExtrasSection
+            notes={notes}
+            bookmarks={bookmarks}
+            onToggleBookmark={handleToggleBookmark}
+            onPreview={(n) => setPreviewNote(n)}
+            onDownload={handleDownloadNote}
+            onOpenUploadExtra={() => setUploadExtraOpen(true)}
+          />
+        )}
+
         {currentTab === 'bookmarks' && (
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-in fade-in">
             <div className="flex items-center gap-2 mb-6">
@@ -471,6 +485,13 @@ export default function App() {
         subjectsList={SUBJECTS_LIST}
         categoriesList={CATEGORIES_LIST}
         initialData={uploadInitialData}
+      />
+
+      {/* Upload Extra Modal (Open to any PDF document) */}
+      <UploadExtraModal
+        isOpen={uploadExtraOpen}
+        onClose={() => setUploadExtraOpen(false)}
+        onNoteUploaded={handleNoteUploaded}
       />
 
       {/* Admin Auth Modal */}

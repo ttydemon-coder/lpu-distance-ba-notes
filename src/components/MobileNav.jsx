@@ -1,5 +1,5 @@
 import React from 'react';
-import { BookOpen, GraduationCap, Calculator, Bookmark, PlusCircle, Lock } from 'lucide-react';
+import { BookOpen, GraduationCap, Calculator, Bookmark, PlusCircle, Lock, Sparkles } from 'lucide-react';
 
 export default function MobileNav({ currentTab, setCurrentTab, onOpenUpload, bookmarksCount, isAdmin, onOpenAdminAuth }) {
   return (
@@ -44,6 +44,19 @@ export default function MobileNav({ currentTab, setCurrentTab, onOpenUpload, boo
           <span className="text-[10px] font-semibold text-orange-600 dark:text-orange-400 mt-0.5">
             {isAdmin ? 'Upload' : 'Admin'}
           </span>
+        </button>
+
+        {/* Extras */}
+        <button
+          onClick={() => setCurrentTab('extras')}
+          className={`flex flex-col items-center justify-center py-1 px-2.5 rounded-lg transition-colors ${
+            currentTab === 'extras'
+              ? 'text-purple-600 dark:text-purple-400 font-bold'
+              : 'text-slate-500 dark:text-slate-400'
+          }`}
+        >
+          <Sparkles className={`w-5 h-5 ${currentTab === 'extras' ? 'stroke-[2.5]' : 'stroke-[1.8]'}`} />
+          <span className="text-[10px] mt-0.5">Extras</span>
         </button>
 
 

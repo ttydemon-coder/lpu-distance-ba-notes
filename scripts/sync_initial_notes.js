@@ -54,7 +54,8 @@ export const CATEGORIES_LIST = [
   "Study Notes",
   "Book PDFs",
   "Sample Question Papers",
-  "Real Exam Papers"
+  "Real Exam Papers",
+  "Extras"
 ];
 `;
 
