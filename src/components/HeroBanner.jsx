@@ -5,10 +5,14 @@ export default function HeroBanner({
   selectedSemester, 
   setSelectedSemester, 
   totalNotes, 
+  totalAvailable = 45,
+  totalMissing = 34,
   totalDownloads,
   activeSubject,
   setActiveSubject,
-  subjectsList
+  subjectsList,
+  availabilityFilter,
+  setAvailabilityFilter
 }) {
   const semesters = [
     { id: 0, label: 'All Semesters', short: 'All' },
@@ -44,29 +48,43 @@ export default function HeroBanner({
             </span>
           </h1>
           <p className="mt-2 text-xs sm:text-sm text-slate-600 dark:text-slate-400 font-normal leading-relaxed max-w-2xl">
-            High-yield study notes, actual book PDFs, official sample question papers, and real examination papers for LPU Distance students.
+            High-yield study notes, university book PDFs, official sample question papers, and real examination papers for LPU Distance students.
           </p>
         </div>
 
         {/* Quick Metrics Grid */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3 mt-5">
-          <div className="bg-white dark:bg-slate-800/80 border border-stone-200 dark:border-slate-700/60 rounded-xl p-3 shadow-sm">
+          <div 
+            onClick={() => setAvailabilityFilter && setAvailabilityFilter('available')}
+            className={`border rounded-xl p-3 shadow-sm cursor-pointer transition-all ${
+              availabilityFilter === 'available'
+                ? 'bg-emerald-50 dark:bg-emerald-950/40 border-emerald-400 dark:border-emerald-600'
+                : 'bg-white dark:bg-slate-800/80 border-stone-200 dark:border-slate-700/60 hover:border-emerald-300'
+            }`}
+          >
             <div className="flex items-center gap-1.5 text-slate-500 dark:text-slate-400 text-[11px]">
-              <FileText className="w-3.5 h-3.5 text-orange-500" />
+              <FileText className="w-3.5 h-3.5 text-emerald-500" />
               <span>Available PDFs</span>
             </div>
             <div className="text-base sm:text-lg font-bold text-slate-900 dark:text-white mt-0.5">
-              {totalNotes}+ <span className="text-[10px] font-normal text-slate-400">Materials</span>
+              {totalAvailable} <span className="text-[10px] font-normal text-emerald-600 dark:text-emerald-400">Ready to Read</span>
             </div>
           </div>
 
-          <div className="bg-white dark:bg-slate-800/80 border border-stone-200 dark:border-slate-700/60 rounded-xl p-3 shadow-sm">
+          <div 
+            onClick={() => setAvailabilityFilter && setAvailabilityFilter('missing')}
+            className={`border rounded-xl p-3 shadow-sm cursor-pointer transition-all ${
+              availabilityFilter === 'missing'
+                ? 'bg-amber-50 dark:bg-amber-950/40 border-amber-400 dark:border-amber-600'
+                : 'bg-white dark:bg-slate-800/80 border-stone-200 dark:border-slate-700/60 hover:border-amber-300'
+            }`}
+          >
             <div className="flex items-center gap-1.5 text-slate-500 dark:text-slate-400 text-[11px]">
-              <DownloadCloud className="w-3.5 h-3.5 text-emerald-500" />
-              <span>Community Reads</span>
+              <DownloadCloud className="w-3.5 h-3.5 text-amber-500" />
+              <span>Missing from Archive</span>
             </div>
             <div className="text-base sm:text-lg font-bold text-slate-900 dark:text-white mt-0.5">
-              {totalDownloads ? totalDownloads.toLocaleString() : '12,500'}+
+              {totalMissing} <span className="text-[10px] font-normal text-amber-600 dark:text-amber-400">Needed</span>
             </div>
           </div>
 
@@ -76,13 +94,13 @@ export default function HeroBanner({
               <span>Semesters 1-6</span>
             </div>
             <div className="text-base sm:text-lg font-bold text-slate-900 dark:text-white mt-0.5">
-              Complete Syllabus
+              Full Degree Catalog
             </div>
           </div>
 
           <div className="bg-white dark:bg-slate-800/80 border border-stone-200 dark:border-slate-700/60 rounded-xl p-3 shadow-sm">
             <div className="flex items-center gap-1.5 text-slate-500 dark:text-slate-400 text-[11px]">
-              <Zap className="w-3.5 h-3.5 text-amber-500" />
+              <Zap className="w-3.5 h-3.5 text-orange-500" />
               <span>Instant Access</span>
             </div>
             <div className="text-base sm:text-lg font-bold text-slate-900 dark:text-white mt-0.5">

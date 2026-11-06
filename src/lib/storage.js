@@ -12,28 +12,40 @@ export const getStoredNotes = async () => {
       const { data, error } = await supabase
         .from('notes')
         .select('*')
+        .order('semester', { ascending: true })
         .order('created_at', { ascending: false });
         
       if (!error && data && data.length > 0) {
-        // Map database columns to app note shape if needed
-        return data.map(item => ({
-          id: item.id || `sb-${Date.now()}`,
-          title: item.title,
-          subject: item.subject,
-          subjectCode: item.subject_code || item.subjectCode,
-          semester: Number(item.semester),
-          category: item.category || 'Study Notes',
-          unit: item.unit || 'Unit 1',
-          author: item.author || 'Anonymous Contributor',
-          pages: item.pages || 10,
-          fileSize: item.file_size || item.fileSize || '1.5 MB',
-          downloadCount: item.download_count || item.downloadCount || 0,
-          date: item.created_at ? item.created_at.split('T')[0] : '2024-05-01',
-          description: item.description || '',
-          pdfUrl: item.pdf_url || item.pdfUrl,
-          tags: Array.isArray(item.tags) ? item.tags : (item.tags ? JSON.parse(item.tags) : []),
-          isVerified: item.is_verified ?? true
-        }));
+        // Filter out deprecated test notes and map columns
+        return data
+          .filter(item => !item.title?.includes('[DEPRECATED]') && !item.pdf_url?.includes('dummy.pdf'))
+          .map(item => {
+            const isMissing = Boolean(
+              item.file_size === 'Missing' || 
+              item.title?.startsWith('[MISSING]') || 
+              !item.pdf_url || 
+              item.is_verified === false
+            );
+            return {
+              id: item.id || `sb-${Date.now()}`,
+              title: item.title,
+              subject: item.subject,
+              subjectCode: item.subject_code || item.subjectCode,
+              semester: Number(item.semester),
+              category: item.category || 'Study Notes',
+              unit: item.unit || 'All Units',
+              author: item.author || 'LPU Contributor',
+              pages: item.pages || 0,
+              fileSize: item.file_size || item.fileSize || (isMissing ? 'Missing' : '1.5 MB'),
+              downloadCount: item.download_count || item.downloadCount || 0,
+              date: item.created_at ? item.created_at.split('T')[0] : '2024-05-01',
+              description: item.description || '',
+              pdfUrl: item.pdf_url || item.pdfUrl || '',
+              tags: Array.isArray(item.tags) ? item.tags : (item.tags ? JSON.parse(item.tags) : []),
+              isVerified: item.is_verified ?? !isMissing,
+              isMissing
+            };
+          });
       }
     } catch (e) {
       console.warn("Could not fetch from Supabase, loading local state:", e);
@@ -70,18 +82,34 @@ export const saveNewNote = async (newNote) => {
         author: newNote.author,
         pages: newNote.pages,
         file_size: newNote.fileSize,
-        download_count: 0,
         description: newNote.description,
         pdf_url: newNote.pdfUrl,
         tags: newNote.tags,
         is_verified: true
       };
       
-      const { data, error } = await supabase.from('notes').insert([payload]).select();
+      // If replacing a missing item, perform an UPDATE
+      if (newNote.replaceNoteId) {
+        const { data, error } = await supabase
+          .from('notes')
+          .update(payload)
+          .eq('id', newNote.replaceNoteId)
+          .select();
+        if (!error && data && data[0]) {
+          return {
+            ...newNote,
+            id: data[0].id,
+            isMissing: false
+          };
+        }
+      }
+
+      const { data, error } = await supabase.from('notes').insert([{ ...payload, download_count: 0 }]).select();
       if (!error && data && data[0]) {
         return {
           ...newNote,
-          id: data[0].id
+          id: data[0].id,
+          isMissing: false
         };
       }
     } catch (e) {

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   X, 
   UploadCloud, 
@@ -10,15 +10,22 @@ import {
 import { uploadPdfToBackblaze } from '../lib/backblazeClient';
 import { saveNewNote } from '../lib/storage';
 
-export default function UploadModal({ isOpen, onClose, onNoteUploaded, subjectsList, categoriesList }) {
+export default function UploadModal({ 
+  isOpen, 
+  onClose, 
+  onNoteUploaded, 
+  subjectsList, 
+  categoriesList,
+  initialData = null 
+}) {
   const [file, setFile] = useState(null);
   const [title, setTitle] = useState('');
   const [subject, setSubject] = useState(subjectsList[1] || 'English Literature');
-  const [subjectCode, setSubjectCode] = useState('DEENG101');
+  const [subjectCode, setSubjectCode] = useState('DENG101');
   const [semester, setSemester] = useState(1);
   const [category, setCategory] = useState('Study Notes');
-  const [unit, setUnit] = useState('Unit 1');
-  const [author, setAuthor] = useState('LPU Distance Portal');
+  const [unit, setUnit] = useState('All Units');
+  const [author, setAuthor] = useState('LPU Distance Archive');
   const [description, setDescription] = useState('');
   const [tagsInput, setTagsInput] = useState('');
   
@@ -27,20 +34,39 @@ export default function UploadModal({ isOpen, onClose, onNoteUploaded, subjectsL
   const [statusMessage, setStatusMessage] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
 
+  useEffect(() => {
+    if (initialData && isOpen) {
+      const cleanTitle = initialData.title ? initialData.title.replace(/^\[MISSING\]\s*/, '') : '';
+      setTitle(cleanTitle);
+      setSubject(initialData.subject || subjectsList[1] || 'English Literature');
+      setSubjectCode(initialData.subjectCode || 'DENG101');
+      setSemester(initialData.semester || 1);
+      setCategory(initialData.category || 'Study Notes');
+      setUnit(initialData.unit || 'All Units');
+      setDescription(initialData.description ? initialData.description.replace(/^⚠️\s*/, '') : '');
+    } else if (!initialData && isOpen) {
+      setTitle('');
+      setFile(null);
+      setErrorMsg('');
+    }
+  }, [initialData, isOpen]);
+
   if (!isOpen) return null;
 
   const handleSubjectChange = (val) => {
     setSubject(val);
     const codeMap = {
-      'English Literature': 'DEENG101',
+      'English Literature': 'DENG101',
+      'Management': 'DMGT101',
+      'Punjabi': 'DPBI101',
+      'Sociology': 'DSOC101',
       'Political Science': 'DEPOL101',
       'History': 'DEHIS101',
-      'Sociology': 'DESOC201',
       'Economics': 'DEECO201',
       'Public Administration': 'DEPUB301',
       'Computer Applications': 'DECAP101',
       'Environmental Studies': 'DEEVS101',
-      'Hindi Literature': 'DEHIN101'
+      'Combined / Real Exams': 'LPU-SEM'
     };
     if (codeMap[val]) {
       setSubjectCode(codeMap[val]);
@@ -95,17 +121,18 @@ export default function UploadModal({ isOpen, onClose, onNoteUploaded, subjectsL
         : (file.size / 1024).toFixed(0) + ' KB';
 
       const newNoteData = {
-        id: `note-${Date.now()}`,
+        id: initialData?.id || `note-${Date.now()}`,
+        replaceNoteId: initialData?.id || null,
         title: title.trim(),
         subject,
         subjectCode: subjectCode.toUpperCase().trim(),
         semester: Number(semester),
         category,
         unit: unit.trim() || 'All Units',
-        author: author.trim() || 'LPU Distance Portal',
+        author: author.trim() || 'LPU Distance Archive',
         pages: Math.max(1, Math.round(file.size / 65000)),
         fileSize: fileSizeFormatted,
-        downloadCount: 0,
+        downloadCount: initialData?.downloadCount || 0,
         date: new Date().toISOString().split('T')[0],
         description: description.trim(),
         pdfUrl: uploadRes.url,

@@ -20,12 +20,14 @@ export default function App() {
   const [selectedSemester, setSelectedSemester] = useState(0); // 0 = all
   const [activeSubject, setActiveSubject] = useState('All Subjects');
   const [activeCategory, setActiveCategory] = useState('All Types');
+  const [availabilityFilter, setAvailabilityFilter] = useState('all'); // 'all' | 'available' | 'missing'
   const [searchQuery, setSearchQuery] = useState('');
   const [currentTab, setCurrentTab] = useState('library'); // 'library' | 'syllabus' | 'calculator' | 'bookmarks'
   
   const [bookmarks, setBookmarks] = useState([]);
   const [previewNote, setPreviewNote] = useState(null);
   const [uploadModalOpen, setUploadModalOpen] = useState(false);
+  const [uploadInitialData, setUploadInitialData] = useState(null);
   const [adminAuthOpen, setAdminAuthOpen] = useState(false);
 
   // Admin access state: only the owner with the passcode can upload
@@ -73,6 +75,7 @@ export default function App() {
 
   // Handle PDF Download
   const handleDownloadNote = (note) => {
+    if (!note.pdfUrl || note.isMissing) return;
     incrementNoteDownload(note.id);
     
     // Update local count
@@ -90,7 +93,14 @@ export default function App() {
 
   // Handle newly uploaded note
   const handleNoteUploaded = (newNote) => {
-    setNotes(prev => [newNote, ...prev]);
+    setNotes(prev => {
+      const exists = prev.some(n => n.id === newNote.id || (newNote.replaceNoteId && n.id === newNote.replaceNoteId));
+      if (exists) {
+        return prev.map(n => (n.id === newNote.id || (newNote.replaceNoteId && n.id === newNote.replaceNoteId)) ? newNote : n);
+      }
+      return [newNote, ...prev];
+    });
+    setUploadInitialData(null);
     setCurrentTab('library');
     if (newNote.semester) {
       setSelectedSemester(newNote.semester);
@@ -101,6 +111,14 @@ export default function App() {
     setIsAdmin(true);
     setUploadModalOpen(true);
   };
+
+  const totalAvailable = useMemo(() => {
+    return notes.filter(n => !n.isMissing && n.fileSize !== 'Missing' && !n.title?.startsWith('[MISSING]') && n.pdfUrl).length;
+  }, [notes]);
+
+  const totalMissing = useMemo(() => {
+    return notes.filter(n => n.isMissing || n.fileSize === 'Missing' || n.title?.startsWith('[MISSING]') || !n.pdfUrl).length;
+  }, [notes]);
 
   // Filter notes
   const filteredNotes = useMemo(() => {
@@ -117,6 +135,15 @@ export default function App() {
 
       // Category filter
       if (activeCategory !== 'All Types' && note.category !== activeCategory) {
+        return false;
+      }
+
+      // Availability filter
+      const isMissingItem = Boolean(note.isMissing || note.fileSize === 'Missing' || note.title?.startsWith('[MISSING]') || !note.pdfUrl);
+      if (availabilityFilter === 'available' && isMissingItem) {
+        return false;
+      }
+      if (availabilityFilter === 'missing' && !isMissingItem) {
         return false;
       }
 
@@ -143,7 +170,7 @@ export default function App() {
 
       return true;
     });
-  }, [notes, selectedSemester, activeSubject, activeCategory, currentTab, bookmarks, searchQuery]);
+  }, [notes, selectedSemester, activeSubject, activeCategory, availabilityFilter, currentTab, bookmarks, searchQuery]);
 
   const totalDownloads = useMemo(() => {
     return notes.reduce((acc, curr) => acc + (curr.downloadCount || 0), 0);
@@ -157,6 +184,7 @@ export default function App() {
         currentTab={currentTab}
         setCurrentTab={setCurrentTab}
         onOpenUpload={() => {
+          setUploadInitialData(null);
           if (isAdmin) setUploadModalOpen(true);
           else setAdminAuthOpen(true);
         }}
@@ -178,17 +206,21 @@ export default function App() {
               selectedSemester={selectedSemester}
               setSelectedSemester={setSelectedSemester}
               totalNotes={notes.length}
+              totalAvailable={totalAvailable}
+              totalMissing={totalMissing}
               totalDownloads={totalDownloads}
               activeSubject={activeSubject}
               setActiveSubject={setActiveSubject}
               subjectsList={SUBJECTS_LIST}
+              availabilityFilter={availabilityFilter}
+              setAvailabilityFilter={setAvailabilityFilter}
             />
 
             {/* Content Container */}
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
               
-              {/* Secondary Category Bar & Results Count */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 mb-6 border-b border-stone-200 dark:border-slate-800 gap-3">
+              {/* Secondary Category Bar & Availability Filter */}
+              <div className="flex flex-col lg:flex-row lg:items-center justify-between pb-4 mb-6 border-b border-stone-200 dark:border-slate-800 gap-3">
                 <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto pb-1 scrollbar-none">
                   {CATEGORIES_LIST.map((cat) => (
                     <button
@@ -205,16 +237,54 @@ export default function App() {
                   ))}
                 </div>
 
-                <div className="text-xs font-semibold text-slate-500 dark:text-slate-400 flex items-center justify-between sm:justify-end gap-2">
-                  <div className="flex items-center gap-1.5">
-                    <Filter className="w-3.5 h-3.5 text-orange-500" />
-                    <span>Showing {filteredNotes.length} {filteredNotes.length === 1 ? 'material' : 'materials'}</span>
+                <div className="flex items-center flex-wrap justify-between sm:justify-end gap-2.5">
+                  {/* Availability Segmented Toggle */}
+                  <div className="flex items-center gap-0.5 p-1 bg-stone-100 dark:bg-slate-800/80 rounded-xl border border-stone-200 dark:border-slate-700/60 text-xs">
+                    <button
+                      onClick={() => setAvailabilityFilter('all')}
+                      className={`px-2.5 py-1 rounded-lg font-medium transition-all ${
+                        availabilityFilter === 'all'
+                          ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-sm font-bold'
+                          : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
+                      }`}
+                    >
+                      All ({notes.length})
+                    </button>
+                    <button
+                      onClick={() => setAvailabilityFilter('available')}
+                      className={`px-2.5 py-1 rounded-lg font-medium transition-all flex items-center gap-1.5 ${
+                        availabilityFilter === 'available'
+                          ? 'bg-emerald-500 text-white shadow-sm font-bold'
+                          : 'text-slate-600 dark:text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400'
+                      }`}
+                    >
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                      Available ({totalAvailable})
+                    </button>
+                    <button
+                      onClick={() => setAvailabilityFilter('missing')}
+                      className={`px-2.5 py-1 rounded-lg font-medium transition-all flex items-center gap-1.5 ${
+                        availabilityFilter === 'missing'
+                          ? 'bg-amber-500 text-white shadow-sm font-bold'
+                          : 'text-slate-600 dark:text-slate-400 hover:text-amber-600 dark:hover:text-amber-400'
+                      }`}
+                    >
+                      <span className="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
+                      Missing ({totalMissing})
+                    </button>
                   </div>
-                  {isAdmin && (
-                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300">
-                      <ShieldCheck className="w-3 h-3" /> Admin Mode
-                    </span>
-                  )}
+
+                  <div className="text-xs font-semibold text-slate-500 dark:text-slate-400 flex items-center gap-2">
+                    <div className="flex items-center gap-1.5">
+                      <Filter className="w-3.5 h-3.5 text-orange-500" />
+                      <span>{filteredNotes.length} items</span>
+                    </div>
+                    {isAdmin && (
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300">
+                        <ShieldCheck className="w-3 h-3" /> Admin Mode
+                      </span>
+                    )}
+                  </div>
                 </div>
               </div>
 
@@ -235,6 +305,15 @@ export default function App() {
                       onToggleBookmark={handleToggleBookmark}
                       onPreview={(n) => setPreviewNote(n)}
                       onDownload={handleDownloadNote}
+                      isAdmin={isAdmin}
+                      onAdminUpload={(n) => {
+                        setUploadInitialData(n);
+                        setUploadModalOpen(true);
+                      }}
+                      onOpenAdminAuth={(n) => {
+                        setUploadInitialData(n);
+                        setAdminAuthOpen(true);
+                      }}
                     />
                   ))}
                 </div>
@@ -254,6 +333,7 @@ export default function App() {
                       setSelectedSemester(0);
                       setActiveSubject('All Subjects');
                       setActiveCategory('All Types');
+                      setAvailabilityFilter('all');
                       setSearchQuery('');
                     }}
                     className="mt-4 px-4 py-2 rounded-xl text-xs font-bold bg-stone-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-stone-200"
@@ -354,10 +434,14 @@ export default function App() {
       {/* Upload Note Modal (Only opened by Admin) */}
       <UploadModal
         isOpen={uploadModalOpen}
-        onClose={() => setUploadModalOpen(false)}
+        onClose={() => {
+          setUploadModalOpen(false);
+          setUploadInitialData(null);
+        }}
         onNoteUploaded={handleNoteUploaded}
         subjectsList={SUBJECTS_LIST}
         categoriesList={CATEGORIES_LIST}
+        initialData={uploadInitialData}
       />
 
       {/* Admin Auth Modal */}
