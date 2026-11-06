@@ -7,7 +7,6 @@ import PdfViewerModal from './components/PdfViewerModal';
 import UploadModal from './components/UploadModal';
 import AdminAuthModal from './components/AdminAuthModal';
 import SyllabusGuide from './components/SyllabusGuide';
-import GpaCalculator from './components/GpaCalculator';
 import Footer from './components/Footer';
 
 import { SUBJECTS_LIST, CATEGORIES_LIST } from './data/initialNotes';
@@ -22,7 +21,7 @@ export default function App() {
   const [activeCategory, setActiveCategory] = useState('All Types');
   const [availabilityFilter, setAvailabilityFilter] = useState('all'); // 'all' | 'available' | 'missing'
   const [searchQuery, setSearchQuery] = useState('');
-  const [currentTab, setCurrentTab] = useState('library'); // 'library' | 'syllabus' | 'calculator' | 'bookmarks'
+  const [currentTab, setCurrentTab] = useState('library'); // 'library' | 'syllabus' | 'bookmarks'
   
   const [bookmarks, setBookmarks] = useState([]);
   const [previewNote, setPreviewNote] = useState(null);
@@ -129,8 +128,20 @@ export default function App() {
       }
 
       // Subject filter
-      if (activeSubject !== 'All Subjects' && note.subject !== activeSubject) {
-        return false;
+      if (activeSubject !== 'All Subjects') {
+        const noteSubj = (note.subject || '').toLowerCase();
+        const activeSubj = activeSubject.toLowerCase();
+        
+        const isMatch = 
+          (activeSubj === 'english' && noteSubj.includes('english')) ||
+          (activeSubj === 'punjabi' && noteSubj.includes('punjabi')) ||
+          (activeSubj === 'management' && noteSubj.includes('management')) ||
+          (activeSubj === 'social science' && (noteSubj.includes('social') || noteSubj.includes('sociology'))) ||
+          noteSubj === activeSubj;
+
+        if (!isMatch) {
+          return false;
+        }
       }
 
       // Category filter
@@ -157,7 +168,9 @@ export default function App() {
         const query = searchQuery.toLowerCase().trim();
         const inTitle = note.title?.toLowerCase().includes(query);
         const inCode = note.subjectCode?.toLowerCase().includes(query);
-        const inSubject = note.subject?.toLowerCase().includes(query);
+        const inSubject = note.subject?.toLowerCase().includes(query) || 
+          (query === 'sociology' && note.subject?.toLowerCase().includes('social')) ||
+          (query === 'social science' && note.subject?.toLowerCase().includes('sociology'));
         const inUnit = note.unit?.toLowerCase().includes(query);
         const inDesc = note.description?.toLowerCase().includes(query);
         const inAuthor = note.author?.toLowerCase().includes(query);
@@ -171,10 +184,6 @@ export default function App() {
       return true;
     });
   }, [notes, selectedSemester, activeSubject, activeCategory, availabilityFilter, currentTab, bookmarks, searchQuery]);
-
-  const totalDownloads = useMemo(() => {
-    return notes.reduce((acc, curr) => acc + (curr.downloadCount || 0), 0);
-  }, [notes]);
 
   return (
     <div className="min-h-screen flex flex-col bg-stone-50/70 dark:bg-slate-950 text-slate-800 dark:text-slate-100 transition-colors">
@@ -201,45 +210,44 @@ export default function App() {
       <main className="flex-1">
         {currentTab === 'library' && (
           <div>
-            {/* Hero / Filter Section */}
+            {/* Hero Banner with compact stats & Semester selector */}
             <HeroBanner
               selectedSemester={selectedSemester}
               setSelectedSemester={setSelectedSemester}
               totalNotes={notes.length}
               totalAvailable={totalAvailable}
               totalMissing={totalMissing}
-              totalDownloads={totalDownloads}
-              activeSubject={activeSubject}
-              setActiveSubject={setActiveSubject}
-              subjectsList={SUBJECTS_LIST}
               availabilityFilter={availabilityFilter}
               setAvailabilityFilter={setAvailabilityFilter}
             />
 
             {/* Content Container */}
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-6">
               
-              {/* Secondary Category Bar & Availability Filter */}
-              <div className="flex flex-col lg:flex-row lg:items-center justify-between pb-4 mb-6 border-b border-stone-200 dark:border-slate-800 gap-3">
-                <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto pb-1 scrollbar-none">
-                  {CATEGORIES_LIST.map((cat) => (
-                    <button
-                      key={cat}
-                      onClick={() => setActiveCategory(cat)}
-                      className={`flex-shrink-0 px-3 py-1.5 rounded-xl text-xs font-semibold transition-colors ${
-                        activeCategory === cat
-                          ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900 shadow-sm'
-                          : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border border-stone-200 dark:border-slate-800 hover:border-slate-400'
-                      }`}
-                    >
-                      {cat}
-                    </button>
-                  ))}
-                </div>
+              {/* Clean Filter Controls */}
+              <div className="space-y-3 pb-4 mb-6 border-b border-stone-200 dark:border-slate-800">
+                
+                {/* Row 1: Core Subjects & Availability Toggle */}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+                  {/* Subject Pills: All, English, Punjabi, Management, Social Science */}
+                  <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
+                    {SUBJECTS_LIST.map((subj) => (
+                      <button
+                        key={subj}
+                        onClick={() => setActiveSubject(subj)}
+                        className={`flex-shrink-0 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
+                          activeSubject === subj
+                            ? 'bg-orange-500 text-white shadow-sm shadow-orange-500/20'
+                            : 'bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border border-stone-200 dark:border-slate-800 hover:border-orange-300 dark:hover:border-slate-700'
+                        }`}
+                      >
+                        {subj}
+                      </button>
+                    ))}
+                  </div>
 
-                <div className="flex items-center flex-wrap justify-between sm:justify-end gap-2.5">
                   {/* Availability Segmented Toggle */}
-                  <div className="flex items-center gap-0.5 p-1 bg-stone-100 dark:bg-slate-800/80 rounded-xl border border-stone-200 dark:border-slate-700/60 text-xs">
+                  <div className="flex items-center gap-1 self-start sm:self-auto p-0.5 bg-stone-100 dark:bg-slate-800/80 rounded-xl border border-stone-200 dark:border-slate-700/60 text-xs">
                     <button
                       onClick={() => setAvailabilityFilter('all')}
                       className={`px-2.5 py-1 rounded-lg font-medium transition-all ${
@@ -252,7 +260,7 @@ export default function App() {
                     </button>
                     <button
                       onClick={() => setAvailabilityFilter('available')}
-                      className={`px-2.5 py-1 rounded-lg font-medium transition-all flex items-center gap-1.5 ${
+                      className={`px-2.5 py-1 rounded-lg font-medium transition-all flex items-center gap-1 ${
                         availabilityFilter === 'available'
                           ? 'bg-emerald-500 text-white shadow-sm font-bold'
                           : 'text-slate-600 dark:text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400'
@@ -263,7 +271,7 @@ export default function App() {
                     </button>
                     <button
                       onClick={() => setAvailabilityFilter('missing')}
-                      className={`px-2.5 py-1 rounded-lg font-medium transition-all flex items-center gap-1.5 ${
+                      className={`px-2.5 py-1 rounded-lg font-medium transition-all flex items-center gap-1 ${
                         availabilityFilter === 'missing'
                           ? 'bg-amber-500 text-white shadow-sm font-bold'
                           : 'text-slate-600 dark:text-slate-400 hover:text-amber-600 dark:hover:text-amber-400'
@@ -273,9 +281,28 @@ export default function App() {
                       Missing ({totalMissing})
                     </button>
                   </div>
+                </div>
 
-                  <div className="text-xs font-semibold text-slate-500 dark:text-slate-400 flex items-center gap-2">
-                    <div className="flex items-center gap-1.5">
+                {/* Row 2: Category Pills & Counter */}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pt-1">
+                  <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
+                    {CATEGORIES_LIST.map((cat) => (
+                      <button
+                        key={cat}
+                        onClick={() => setActiveCategory(cat)}
+                        className={`flex-shrink-0 px-2.5 py-1 rounded-lg text-xs font-medium transition-colors ${
+                          activeCategory === cat
+                            ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900 font-semibold shadow-sm'
+                            : 'bg-stone-100 dark:bg-slate-800/60 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
+                        }`}
+                      >
+                        {cat}
+                      </button>
+                    ))}
+                  </div>
+
+                  <div className="text-xs font-semibold text-slate-500 dark:text-slate-400 flex items-center gap-2 self-end sm:self-auto">
+                    <div className="flex items-center gap-1">
                       <Filter className="w-3.5 h-3.5 text-orange-500" />
                       <span>{filteredNotes.length} items</span>
                     </div>
@@ -286,6 +313,7 @@ export default function App() {
                     )}
                   </div>
                 </div>
+
               </div>
 
               {/* Notes Grid */}
@@ -354,10 +382,6 @@ export default function App() {
               setSearchQuery(courseCode);
             }} 
           />
-        )}
-
-        {currentTab === 'calculator' && (
-          <GpaCalculator />
         )}
 
         {currentTab === 'bookmarks' && (

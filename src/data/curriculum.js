@@ -2,13 +2,12 @@ export const LPU_BA_CURRICULUM = [
   {
     semester: 1,
     title: "Semester 1",
-    subtitle: "English, Punjabi, Sociology & Management Foundations",
+    subtitle: "English, Punjabi, Social Science & Management Foundations",
     courses: [
       { code: "DENG101", title: "Basic English / Communication", credits: 4, type: "Core English" },
       { code: "DPBI101", title: "Punjabi Sahitya / Compulsory Punjabi", credits: 4, type: "Language" },
-      { code: "DSOC101", title: "Introduction to Sociology - I", credits: 4, type: "Discipline 1" },
-      { code: "DMGT101", title: "Principles of Management - I", credits: 4, type: "Discipline 2" },
-      { code: "DEEVS101", title: "Environmental Studies", credits: 2, type: "AECC" }
+      { code: "DSOC101", title: "Introduction to Social Science - I", credits: 4, type: "Discipline 1" },
+      { code: "DMGT101", title: "Principles of Management - I", credits: 4, type: "Discipline 2" }
     ]
   },
   {
@@ -64,7 +63,7 @@ export const LPU_BA_CURRICULUM = [
       { code: "DENG303", title: "Elective English - VI (Post-Colonial)", credits: 4, type: "Core" },
       { code: "DMGT208", title: "Strategic Management & Business Policy", credits: 4, type: "Discipline" },
       { code: "DPBI301", title: "Punjabi Classical & Modern Poetry", credits: 4, type: "Language" },
-      { code: "DSOC302", title: "Sociological Thinkers & Theory", credits: 4, type: "Discipline" }
+      { code: "DSOC302", title: "Social Science Thinkers & Theory", credits: 4, type: "Discipline" }
     ]
   }
 ];

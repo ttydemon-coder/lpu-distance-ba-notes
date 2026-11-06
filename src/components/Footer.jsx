@@ -31,11 +31,10 @@ export default function Footer() {
               Core Subjects
             </h4>
             <ul className="space-y-2 text-xs text-slate-600 dark:text-slate-400">
-              <li>English Literature (DEENG)</li>
-              <li>Political Science (DEPOL)</li>
-              <li>Indian History (DEHIS)</li>
-              <li>Public Administration (DEPUB)</li>
-              <li>Sociology & Economics</li>
+              <li>English (DENG)</li>
+              <li>Punjabi (DPBI)</li>
+              <li>Management (DMGT)</li>
+              <li>Social Science (DSOC)</li>
             </ul>
           </div>
 

@@ -56,17 +56,12 @@ export default function UploadModal({
   const handleSubjectChange = (val) => {
     setSubject(val);
     const codeMap = {
+      'English': 'DENG101',
       'English Literature': 'DENG101',
       'Management': 'DMGT101',
       'Punjabi': 'DPBI101',
-      'Sociology': 'DSOC101',
-      'Political Science': 'DEPOL101',
-      'History': 'DEHIS101',
-      'Economics': 'DEECO201',
-      'Public Administration': 'DEPUB301',
-      'Computer Applications': 'DECAP101',
-      'Environmental Studies': 'DEEVS101',
-      'Combined / Real Exams': 'LPU-SEM'
+      'Social Science': 'DSOC101',
+      'Sociology': 'DSOC101'
     };
     if (codeMap[val]) {
       setSubjectCode(codeMap[val]);
@@ -298,7 +293,7 @@ export default function UploadModal({
                 type="text"
                 value={subjectCode}
                 onChange={(e) => setSubjectCode(e.target.value)}
-                placeholder="e.g., DEPOL101"
+                placeholder="e.g., DENG101"
                 className="w-full px-3 py-2 rounded-xl border border-stone-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs sm:text-sm font-mono text-slate-900 dark:text-white focus:outline-none focus:border-orange-500"
               />
             </div>

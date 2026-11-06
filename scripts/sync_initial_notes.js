@@ -43,11 +43,10 @@ async function run() {
 
 export const SUBJECTS_LIST = [
   "All Subjects",
-  "English Literature",
-  "Management",
+  "English",
   "Punjabi",
-  "Sociology",
-  "Combined / Real Exams"
+  "Management",
+  "Social Science"
 ];
 
 export const CATEGORIES_LIST = [

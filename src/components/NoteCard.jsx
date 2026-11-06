@@ -122,7 +122,9 @@ export default function NoteCard({
         {/* Note Subject & Unit */}
         <div className="flex items-center gap-1.5 text-xs font-semibold text-orange-600 dark:text-orange-400 mb-1">
           <BookOpen className="w-3.5 h-3.5 flex-shrink-0" />
-          <span className="truncate">{note.subject}</span>
+          <span className="truncate">
+            {note.subject === 'Sociology' ? 'Social Science' : (note.subject === 'English Literature' ? 'English' : note.subject)}
+          </span>
           {note.unit && (
             <>
               <span className="text-slate-300 dark:text-slate-700">•</span>

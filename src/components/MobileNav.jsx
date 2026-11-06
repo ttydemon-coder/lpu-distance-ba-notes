@@ -46,18 +46,7 @@ export default function MobileNav({ currentTab, setCurrentTab, onOpenUpload, boo
           </span>
         </button>
 
-        {/* CGPA Calculator */}
-        <button
-          onClick={() => setCurrentTab('calculator')}
-          className={`flex flex-col items-center justify-center py-1 px-2.5 rounded-lg transition-colors ${
-            currentTab === 'calculator'
-              ? 'text-orange-600 dark:text-orange-400 font-bold'
-              : 'text-slate-500 dark:text-slate-400'
-          }`}
-        >
-          <Calculator className={`w-5 h-5 ${currentTab === 'calculator' ? 'stroke-[2.5]' : 'stroke-[1.8]'}`} />
-          <span className="text-[10px] mt-0.5">CGPA</span>
-        </button>
+
 
         {/* Bookmarks */}
         <button

@@ -99,17 +99,7 @@ export default function Navbar({
               <GraduationCap className="w-3.5 h-3.5" />
               Syllabus
             </button>
-            <button
-              onClick={() => setCurrentTab('calculator')}
-              className={`flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
-                currentTab === 'calculator' 
-                  ? 'bg-orange-500/10 text-orange-600 dark:text-orange-400' 
-                  : 'text-slate-600 dark:text-slate-300 hover:bg-stone-100 dark:hover:bg-slate-800'
-              }`}
-            >
-              <Calculator className="w-3.5 h-3.5" />
-              CGPA Calc
-            </button>
+
             <button
               onClick={() => setCurrentTab('bookmarks')}
               className={`relative flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
