@@ -10,7 +10,10 @@ import {
   AlertTriangle,
   UploadCloud,
   BellRing,
-  Lock
+  Lock,
+  Trash2,
+  CheckSquare,
+  Square
 } from 'lucide-react';
 
 export default function NoteCard({ 
@@ -21,7 +24,10 @@ export default function NoteCard({
   onDownload,
   isAdmin = false,
   onAdminUpload,
-  onOpenAdminAuth
+  onOpenAdminAuth,
+  onAdminDelete,
+  isSelected = false,
+  onToggleSelect
 }) {
   const [copied, setCopied] = useState(false);
   const [requested, setRequested] = useState(false);
@@ -65,15 +71,34 @@ export default function NoteCard({
 
   return (
     <div className={`group relative flex flex-col justify-between rounded-2xl p-4 sm:p-5 shadow-sm transition-all ${
-      isMissing 
-        ? 'bg-amber-50/20 dark:bg-amber-950/15 border-2 border-dashed border-amber-300/80 dark:border-amber-800/50 hover:border-amber-400 dark:hover:border-amber-700' 
-        : 'bg-white dark:bg-slate-900 border border-stone-200 dark:border-slate-800 hover:shadow-md hover:border-orange-300 dark:hover:border-slate-700'
+      isSelected
+        ? 'ring-2 ring-orange-500 border-orange-500 bg-orange-50/20 dark:bg-orange-950/20'
+        : isMissing 
+          ? 'bg-amber-50/20 dark:bg-amber-950/15 border-2 border-dashed border-amber-300/80 dark:border-amber-800/50 hover:border-amber-400 dark:hover:border-amber-700' 
+          : 'bg-white dark:bg-slate-900 border border-stone-200 dark:border-slate-800 hover:shadow-md hover:border-orange-300 dark:hover:border-slate-700 hover:-translate-y-0.5'
     }`}>
       
       <div>
         {/* Top Badges & Actions */}
         <div className="flex items-center justify-between gap-1.5 mb-2.5">
           <div className="flex items-center gap-1.5 flex-wrap">
+            {isAdmin && (
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onToggleSelect && onToggleSelect(note.id);
+                }}
+                className={`p-1 -ml-1 rounded-md transition-colors ${
+                  isSelected 
+                    ? 'text-orange-600 bg-orange-100 dark:bg-orange-950/70' 
+                    : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-stone-100 dark:hover:bg-slate-800'
+                }`}
+                title={isSelected ? "Deselect" : "Select for batch action"}
+              >
+                {isSelected ? <CheckSquare className="w-4 h-4 text-orange-600" /> : <Square className="w-4 h-4" />}
+              </button>
+            )}
             <span className="px-2 py-0.5 rounded-md text-[10px] font-bold tracking-wide uppercase bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-200 border border-stone-200 dark:border-slate-700">
               Sem {note.semester}
             </span>
@@ -91,7 +116,7 @@ export default function NoteCard({
             )}
           </div>
 
-          {/* Bookmark & Share Actions */}
+          {/* Bookmark, Share & Admin Delete Actions */}
           <div className="flex items-center gap-0.5">
             {!isMissing && (
               <button
@@ -116,6 +141,19 @@ export default function NoteCard({
             >
               {copied ? <Check className="w-4 h-4 text-emerald-500" /> : <Share2 className="w-4 h-4" />}
             </button>
+            {isAdmin && (
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onAdminDelete && onAdminDelete(note);
+                }}
+                title="Delete document (Admin)"
+                className="p-1.5 text-rose-500 hover:text-rose-700 hover:bg-rose-50 dark:hover:bg-rose-950/50 rounded-lg transition-colors ml-0.5"
+              >
+                <Trash2 className="w-4 h-4" />
+              </button>
+            )}
           </div>
         </div>
 

@@ -9,12 +9,13 @@ import AdminAuthModal from './components/AdminAuthModal';
 import SyllabusGuide from './components/SyllabusGuide';
 import ExtrasSection from './components/ExtrasSection';
 import UploadExtraModal from './components/UploadExtraModal';
+import DeleteConfirmModal from './components/DeleteConfirmModal';
 import Footer from './components/Footer';
 
 import { SUBJECTS_LIST, CATEGORIES_LIST } from './data/initialNotes';
-import { getStoredNotes, incrementNoteDownload, getBookmarks, toggleBookmark } from './lib/storage';
+import { getStoredNotes, incrementNoteDownload, getBookmarks, toggleBookmark, deleteNotes } from './lib/storage';
 import { initDownloadToken, getAuthorizedPdfUrl } from './lib/backblazeClient';
-import { BookOpen, Search, Filter, Bookmark, PlusCircle, ShieldCheck } from 'lucide-react';
+import { BookOpen, Search, Filter, Bookmark, PlusCircle, ShieldCheck, Trash2, CheckSquare, Square } from 'lucide-react';
 
 export default function App() {
   const [notes, setNotes] = useState([]);
@@ -32,6 +33,11 @@ export default function App() {
   const [uploadInitialData, setUploadInitialData] = useState(null);
   const [uploadExtraOpen, setUploadExtraOpen] = useState(false);
   const [adminAuthOpen, setAdminAuthOpen] = useState(false);
+
+  // Multi-select & delete state (Admin only)
+  const [selectedNoteIds, setSelectedNoteIds] = useState([]);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [notesToDelete, setNotesToDelete] = useState([]);
 
   // Admin access state: only the owner with the passcode can upload
   const [isAdmin, setIsAdmin] = useState(() => {
@@ -117,6 +123,36 @@ export default function App() {
   const handleAuthenticated = () => {
     setIsAdmin(true);
     setUploadModalOpen(true);
+  };
+
+  // Multi-selection handlers
+  const handleToggleSelect = (noteId) => {
+    setSelectedNoteIds(prev => 
+      prev.includes(noteId) ? prev.filter(id => id !== noteId) : [...prev, noteId]
+    );
+  };
+
+  // Single delete request
+  const handleRequestDelete = (note) => {
+    setNotesToDelete([note]);
+    setDeleteModalOpen(true);
+  };
+
+  // Batch delete request
+  const handleRequestBatchDelete = () => {
+    const toDelete = notes.filter(n => selectedNoteIds.includes(n.id));
+    if (toDelete.length > 0) {
+      setNotesToDelete(toDelete);
+      setDeleteModalOpen(true);
+    }
+  };
+
+  // Confirm delete execution (2-step completed)
+  const handleConfirmDelete = async (ids) => {
+    await deleteNotes(ids);
+    setNotes(prev => prev.filter(n => !ids.includes(n.id)));
+    setSelectedNoteIds(prev => prev.filter(id => !ids.includes(id)));
+    setBookmarks(prev => prev.filter(id => !ids.includes(id)));
   };
 
   const totalAvailable = useMemo(() => {
@@ -309,11 +345,31 @@ export default function App() {
                     ))}
                   </div>
 
-                  <div className="text-xs font-semibold text-slate-500 dark:text-slate-400 flex items-center gap-2 self-end sm:self-auto">
+                  <div className="text-xs font-semibold text-slate-500 dark:text-slate-400 flex items-center gap-2 self-end sm:self-auto flex-wrap">
                     <div className="flex items-center gap-1">
                       <Filter className="w-3.5 h-3.5 text-orange-500" />
                       <span>{filteredNotes.length} items</span>
                     </div>
+
+                    {isAdmin && filteredNotes.length > 0 && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const allFilteredIds = filteredNotes.map(n => n.id);
+                          const allSelected = allFilteredIds.every(id => selectedNoteIds.includes(id));
+                          if (allSelected) {
+                            setSelectedNoteIds(prev => prev.filter(id => !allFilteredIds.includes(id)));
+                          } else {
+                            setSelectedNoteIds(prev => Array.from(new Set([...prev, ...allFilteredIds])));
+                          }
+                        }}
+                        className="text-xs font-semibold text-orange-600 dark:text-orange-400 hover:underline cursor-pointer flex items-center gap-1 ml-1"
+                      >
+                        <CheckSquare className="w-3.5 h-3.5" />
+                        <span>{filteredNotes.every(n => selectedNoteIds.includes(n.id)) ? 'Deselect All' : 'Select All'}</span>
+                      </button>
+                    )}
+
                     {isAdmin && (
                       <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300">
                         <ShieldCheck className="w-3 h-3" /> Admin Mode
@@ -350,6 +406,9 @@ export default function App() {
                         setUploadInitialData(n);
                         setAdminAuthOpen(true);
                       }}
+                      onAdminDelete={handleRequestDelete}
+                      isSelected={selectedNoteIds.includes(note.id)}
+                      onToggleSelect={handleToggleSelect}
                     />
                   ))}
                 </div>
@@ -400,6 +459,11 @@ export default function App() {
             onPreview={(n) => setPreviewNote(n)}
             onDownload={handleDownloadNote}
             onOpenUploadExtra={() => setUploadExtraOpen(true)}
+            isAdmin={isAdmin}
+            onAdminDelete={handleRequestDelete}
+            selectedNoteIds={selectedNoteIds}
+            onToggleSelect={handleToggleSelect}
+            onBatchDelete={handleRequestBatchDelete}
           />
         )}
 
@@ -427,6 +491,10 @@ export default function App() {
                     onToggleBookmark={handleToggleBookmark}
                     onPreview={(n) => setPreviewNote(n)}
                     onDownload={handleDownloadNote}
+                    isAdmin={isAdmin}
+                    onAdminDelete={handleRequestDelete}
+                    isSelected={selectedNoteIds.includes(note.id)}
+                    onToggleSelect={handleToggleSelect}
                   />
                 ))}
               </div>
@@ -501,6 +569,48 @@ export default function App() {
         onAuthenticated={handleAuthenticated}
         currentPasscode={adminPasscode}
       />
+
+      {/* 2-Step Admin Delete Confirmation Modal */}
+      <DeleteConfirmModal
+        isOpen={deleteModalOpen}
+        notesToDelete={notesToDelete}
+        onClose={() => {
+          setDeleteModalOpen(false);
+          setNotesToDelete([]);
+        }}
+        onConfirmDelete={handleConfirmDelete}
+      />
+
+      {/* Floating Batch Actions Bar (Admin Multi-Delete) */}
+      {isAdmin && selectedNoteIds.length > 0 && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-slate-900/95 dark:bg-slate-800/95 text-white backdrop-blur-md px-4 sm:px-6 py-3 rounded-2xl shadow-2xl border border-slate-700 flex items-center gap-3 sm:gap-4 max-w-lg w-[92%] sm:w-auto animate-in slide-in-from-bottom-6 duration-200">
+          <div className="flex items-center gap-2">
+            <span className="w-6 h-6 rounded-full bg-orange-500 text-white font-bold text-xs flex items-center justify-center">
+              {selectedNoteIds.length}
+            </span>
+            <span className="text-xs sm:text-sm font-semibold whitespace-nowrap">
+              {selectedNoteIds.length === 1 ? '1 file selected' : `${selectedNoteIds.length} files selected`}
+            </span>
+          </div>
+
+          <div className="h-4 w-px bg-slate-700 hidden sm:block" />
+
+          <button
+            onClick={() => setSelectedNoteIds([])}
+            className="text-xs text-slate-400 hover:text-white px-2 py-1 rounded-lg transition-colors whitespace-nowrap"
+          >
+            Clear
+          </button>
+
+          <button
+            onClick={handleRequestBatchDelete}
+            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold bg-rose-600 hover:bg-rose-700 text-white shadow-sm active:scale-95 transition-all whitespace-nowrap ml-auto sm:ml-0"
+          >
+            <Trash2 className="w-3.5 h-3.5" />
+            <span>Delete Selected</span>
+          </button>
+        </div>
+      )}
 
     </div>
   );

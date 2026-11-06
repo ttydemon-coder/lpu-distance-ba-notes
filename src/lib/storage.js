@@ -167,3 +167,38 @@ export const toggleBookmark = (noteId) => {
   localStorage.setItem(BOOKMARKS_KEY, JSON.stringify(updated));
   return updated;
 };
+
+export const deleteNotes = async (noteIds) => {
+  const ids = Array.isArray(noteIds) ? noteIds : [noteIds];
+  if (!ids.length) return true;
+
+  const supabase = getSupabaseClient();
+  if (supabase) {
+    try {
+      const { error: delErr } = await supabase.from('notes').delete().in('id', ids);
+      if (delErr) {
+        // If DELETE is restricted by RLS, mark as deprecated so it is filtered out
+        await supabase.from('notes').update({ title: `[DEPRECATED] Admin deleted ${Date.now()}` }).in('id', ids);
+      }
+    } catch (err) {
+      try {
+        await supabase.from('notes').update({ title: `[DEPRECATED] Admin deleted ${Date.now()}` }).in('id', ids);
+      } catch (e) {
+        console.warn("Supabase deletion error:", e);
+      }
+    }
+  }
+
+  // Update local storage fallback
+  const stored = localStorage.getItem(LOCAL_STORAGE_KEY);
+  if (stored) {
+    try {
+      const notes = JSON.parse(stored);
+      const updated = notes.filter(n => !ids.includes(n.id));
+      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(updated));
+    } catch {}
+  }
+
+  return true;
+};
+

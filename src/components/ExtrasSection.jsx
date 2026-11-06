@@ -13,7 +13,10 @@ import {
   FolderOpen,
   Calendar,
   User,
-  ExternalLink
+  ExternalLink,
+  Trash2,
+  CheckSquare,
+  Square
 } from 'lucide-react';
 
 export default function ExtrasSection({ 
@@ -22,7 +25,12 @@ export default function ExtrasSection({
   onToggleBookmark, 
   onPreview, 
   onDownload, 
-  onOpenUploadExtra 
+  onOpenUploadExtra,
+  isAdmin = false,
+  onAdminDelete,
+  selectedNoteIds = [],
+  onToggleSelect,
+  onBatchDelete
 }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedSem, setSelectedSem] = useState(-1); // -1 = All Extras
@@ -165,15 +173,37 @@ export default function ExtrasSection({
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
           {extraNotes.map((note) => {
             const isBookmarked = bookmarks.includes(note.id);
+            const isSelected = selectedNoteIds.includes(note.id);
             return (
               <div 
                 key={note.id}
-                className="group relative flex flex-col justify-between rounded-2xl p-5 bg-white dark:bg-slate-900 border border-stone-200 dark:border-slate-800 hover:shadow-md hover:border-purple-300 dark:hover:border-purple-900/60 hover:-translate-y-0.5 transition-all"
+                className={`group relative flex flex-col justify-between rounded-2xl p-5 bg-white dark:bg-slate-900 border transition-all ${
+                  isSelected 
+                    ? 'ring-2 ring-purple-500 border-purple-500 bg-purple-50/20 dark:bg-purple-950/20' 
+                    : 'border-stone-200 dark:border-slate-800 hover:shadow-md hover:border-purple-300 dark:hover:border-purple-900/60 hover:-translate-y-0.5'
+                }`}
               >
                 <div>
                   {/* Top Badges */}
                   <div className="flex items-center justify-between gap-1.5 mb-2.5">
                     <div className="flex items-center gap-1.5 flex-wrap">
+                      {isAdmin && (
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onToggleSelect && onToggleSelect(note.id);
+                          }}
+                          className={`p-1 -ml-1 rounded-md transition-colors ${
+                            isSelected 
+                              ? 'text-purple-600 bg-purple-100 dark:bg-purple-950/70' 
+                              : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-stone-100 dark:hover:bg-slate-800'
+                          }`}
+                          title={isSelected ? "Deselect" : "Select for batch action"}
+                        >
+                          {isSelected ? <CheckSquare className="w-4 h-4 text-purple-600" /> : <Square className="w-4 h-4" />}
+                        </button>
+                      )}
                       <span className="px-2 py-0.5 rounded-md text-[10px] font-bold tracking-wide uppercase bg-purple-100 text-purple-800 dark:bg-purple-950/70 dark:text-purple-300 border border-purple-200 dark:border-purple-900/50">
                         Extras
                       </span>
@@ -191,7 +221,7 @@ export default function ExtrasSection({
                       </span>
                     </div>
 
-                    {/* Bookmark & Share */}
+                    {/* Bookmark, Share & Admin Delete */}
                     <div className="flex items-center gap-0.5">
                       <button
                         onClick={(e) => {
@@ -214,6 +244,19 @@ export default function ExtrasSection({
                       >
                         {copiedId === note.id ? <Check className="w-4 h-4 text-emerald-500" /> : <Share2 className="w-4 h-4" />}
                       </button>
+                      {isAdmin && (
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onAdminDelete && onAdminDelete(note);
+                          }}
+                          title="Delete document (Admin)"
+                          className="p-1.5 text-rose-500 hover:text-rose-700 hover:bg-rose-50 dark:hover:bg-rose-950/50 rounded-lg transition-colors ml-0.5"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      )}
                     </div>
                   </div>
 
