@@ -11,6 +11,7 @@ import Footer from './components/Footer';
 
 import { SUBJECTS_LIST, CATEGORIES_LIST } from './data/initialNotes';
 import { getStoredNotes, incrementNoteDownload, getBookmarks, toggleBookmark } from './lib/storage';
+import { initDownloadToken, getAuthorizedPdfUrl } from './lib/backblazeClient';
 import { BookOpen, Search, Filter, Bookmark, PlusCircle, ShieldCheck } from 'lucide-react';
 
 export default function App() {
@@ -63,7 +64,9 @@ export default function App() {
   };
 
   useEffect(() => {
-    refreshNotes();
+    initDownloadToken().finally(() => {
+      refreshNotes();
+    });
   }, []);
 
   // Handle Bookmarks
@@ -80,9 +83,11 @@ export default function App() {
     // Update local count
     setNotes(prev => prev.map(n => n.id === note.id ? { ...n, downloadCount: (n.downloadCount || 0) + 1 } : n));
 
+    const finalUrl = getAuthorizedPdfUrl(note.pdfUrl);
+
     // Trigger download
     const link = document.createElement('a');
-    link.href = note.pdfUrl;
+    link.href = finalUrl;
     link.target = '_blank';
     link.download = `${note.subjectCode}-${note.title}.pdf`;
     document.body.appendChild(link);

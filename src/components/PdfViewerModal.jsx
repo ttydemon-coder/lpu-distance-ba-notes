@@ -10,11 +10,14 @@ import {
   CheckCircle2, 
   Info 
 } from 'lucide-react';
+import { getAuthorizedPdfUrl } from '../lib/backblazeClient';
 
 export default function PdfViewerModal({ note, onClose, onDownload }) {
   const [isFullscreen, setIsFullscreen] = useState(false);
 
   if (!note) return null;
+
+  const finalPdfUrl = getAuthorizedPdfUrl(note.pdfUrl);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-slate-950/80 backdrop-blur-sm animate-in fade-in duration-200">
@@ -54,7 +57,7 @@ export default function PdfViewerModal({ note, onClose, onDownload }) {
             </button>
 
             <a
-              href={note.pdfUrl}
+              href={finalPdfUrl}
               target="_blank"
               rel="noopener noreferrer"
               title="Open in new window"
@@ -84,7 +87,7 @@ export default function PdfViewerModal({ note, onClose, onDownload }) {
         {/* Reader Body / PDF Frame */}
         <div className="flex-1 w-full h-full relative bg-stone-100 dark:bg-slate-950">
           <iframe
-            src={`${note.pdfUrl}#toolbar=1&navpanes=0`}
+            src={`${finalPdfUrl}#toolbar=1&navpanes=0`}
             title={note.title}
             className="w-full h-full border-0"
           />
@@ -94,7 +97,7 @@ export default function PdfViewerModal({ note, onClose, onDownload }) {
             <Info className="w-3.5 h-3.5 text-orange-500" />
             <span>Having trouble previewing?</span>
             <a 
-              href={note.pdfUrl} 
+              href={finalPdfUrl} 
               target="_blank" 
               rel="noopener noreferrer" 
               className="font-bold text-orange-600 dark:text-orange-400 underline"

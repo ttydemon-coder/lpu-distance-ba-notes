@@ -1,5 +1,6 @@
 import { INITIAL_NOTES } from '../data/initialNotes';
 import { getSupabaseClient } from './supabaseClient';
+import { getAuthorizedPdfUrl } from './backblazeClient';
 
 const LOCAL_STORAGE_KEY = 'lpu_notes_catalog_v1';
 const BOOKMARKS_KEY = 'lpu_notes_bookmarks_v1';
@@ -40,7 +41,7 @@ export const getStoredNotes = async () => {
               downloadCount: item.download_count || item.downloadCount || 0,
               date: item.created_at ? item.created_at.split('T')[0] : '2024-05-01',
               description: item.description || '',
-              pdfUrl: item.pdf_url || item.pdfUrl || '',
+              pdfUrl: getAuthorizedPdfUrl(item.pdf_url || item.pdfUrl || ''),
               tags: Array.isArray(item.tags) ? item.tags : (item.tags ? JSON.parse(item.tags) : []),
               isVerified: item.is_verified ?? !isMissing,
               isMissing
@@ -56,7 +57,8 @@ export const getStoredNotes = async () => {
   const stored = localStorage.getItem(LOCAL_STORAGE_KEY);
   if (stored) {
     try {
-      return JSON.parse(stored);
+      const parsed = JSON.parse(stored);
+      return parsed.map(n => ({ ...n, pdfUrl: getAuthorizedPdfUrl(n.pdfUrl) }));
     } catch {
       // parse error, fallback to initial
     }
@@ -64,7 +66,7 @@ export const getStoredNotes = async () => {
 
   // Initialize with curated seed notes
   localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(INITIAL_NOTES));
-  return INITIAL_NOTES;
+  return INITIAL_NOTES.map(n => ({ ...n, pdfUrl: getAuthorizedPdfUrl(n.pdfUrl) }));
 };
 
 export const saveNewNote = async (newNote) => {
