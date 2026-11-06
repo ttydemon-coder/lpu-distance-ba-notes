@@ -5,8 +5,8 @@ export default function HeroBanner({
   selectedSemester, 
   setSelectedSemester, 
   totalNotes, 
-  totalAvailable = 59,
-  totalMissing = 27,
+  totalAvailable = 60,
+  totalMissing = 26,
   availabilityFilter,
   setAvailabilityFilter
 }) {
