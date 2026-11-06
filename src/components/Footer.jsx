@@ -44,6 +44,11 @@ export default function Footer() {
             </h4>
             <ul className="space-y-2 text-xs text-slate-600 dark:text-slate-400">
               <li>
+                <a href="https://github.com/ttydemon-coder/LPU-BA-Notes" target="_blank" rel="noreferrer" className="flex items-center gap-1 font-semibold text-orange-600 dark:text-orange-400 hover:underline">
+                  GitHub PDF Repository <ExternalLink className="w-3 h-3" />
+                </a>
+              </li>
+              <li>
                 <a href="https://ums.lpu.in" target="_blank" rel="noreferrer" className="flex items-center gap-1 hover:text-orange-600">
                   LPU e-Connect (UMS) <ExternalLink className="w-3 h-3" />
                 </a>
