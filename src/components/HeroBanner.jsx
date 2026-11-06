@@ -81,17 +81,17 @@ export default function HeroBanner({
 
         {/* Clean Semester Filter Bar */}
         <div>
-          <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto pb-1 pt-1 scrollbar-none">
+          <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto sm:flex-wrap pb-1 pt-1 scrollbar-none">
             {semesters.map((sem) => {
               const isActive = selectedSemester === sem.id;
               return (
                 <button
                   key={sem.id}
                   onClick={() => setSelectedSemester(sem.id)}
-                  className={`flex-shrink-0 px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all ${
+                  className={`flex-shrink-0 px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer ${
                     isActive
-                      ? 'bg-slate-900 dark:bg-orange-500 text-white shadow-sm'
-                      : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-stone-200 dark:border-slate-700 hover:border-slate-400'
+                      ? 'bg-slate-900 dark:bg-orange-500 text-white shadow-sm scale-[1.02]'
+                      : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-stone-200 dark:border-slate-700 hover:border-orange-400 dark:hover:border-slate-500 hover:shadow-xs'
                   }`}
                 >
                   <span className="sm:hidden">{sem.short}</span>

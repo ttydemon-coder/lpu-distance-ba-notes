@@ -235,15 +235,15 @@ export default function App() {
                 {/* Row 1: Core Subjects & Availability Toggle */}
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
                   {/* Subject Pills: All, English, Punjabi, Management, Social Science */}
-                  <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
+                  <div className="flex items-center gap-1.5 overflow-x-auto sm:flex-wrap pb-1 scrollbar-none">
                     {SUBJECTS_LIST.map((subj) => (
                       <button
                         key={subj}
                         onClick={() => setActiveSubject(subj)}
-                        className={`flex-shrink-0 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
+                        className={`flex-shrink-0 px-3 py-1.5 rounded-xl text-xs font-semibold cursor-pointer transition-all ${
                           activeSubject === subj
                             ? 'bg-orange-500 text-white shadow-sm shadow-orange-500/20'
-                            : 'bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border border-stone-200 dark:border-slate-800 hover:border-orange-300 dark:hover:border-slate-700'
+                            : 'bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border border-stone-200 dark:border-slate-800 hover:border-orange-300 dark:hover:border-slate-700 hover:shadow-xs'
                         }`}
                       >
                         {subj}
@@ -255,7 +255,7 @@ export default function App() {
                   <div className="flex items-center gap-1 self-start sm:self-auto p-0.5 bg-stone-100 dark:bg-slate-800/80 rounded-xl border border-stone-200 dark:border-slate-700/60 text-xs">
                     <button
                       onClick={() => setAvailabilityFilter('all')}
-                      className={`px-2.5 py-1 rounded-lg font-medium transition-all ${
+                      className={`px-2.5 py-1 rounded-lg font-medium cursor-pointer transition-all ${
                         availabilityFilter === 'all'
                           ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-sm font-bold'
                           : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
@@ -265,7 +265,7 @@ export default function App() {
                     </button>
                     <button
                       onClick={() => setAvailabilityFilter('available')}
-                      className={`px-2.5 py-1 rounded-lg font-medium transition-all flex items-center gap-1 ${
+                      className={`px-2.5 py-1 rounded-lg font-medium cursor-pointer transition-all flex items-center gap-1 ${
                         availabilityFilter === 'available'
                           ? 'bg-emerald-500 text-white shadow-sm font-bold'
                           : 'text-slate-600 dark:text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400'
@@ -276,7 +276,7 @@ export default function App() {
                     </button>
                     <button
                       onClick={() => setAvailabilityFilter('missing')}
-                      className={`px-2.5 py-1 rounded-lg font-medium transition-all flex items-center gap-1 ${
+                      className={`px-2.5 py-1 rounded-lg font-medium cursor-pointer transition-all flex items-center gap-1 ${
                         availabilityFilter === 'missing'
                           ? 'bg-amber-500 text-white shadow-sm font-bold'
                           : 'text-slate-600 dark:text-slate-400 hover:text-amber-600 dark:hover:text-amber-400'
@@ -290,15 +290,15 @@ export default function App() {
 
                 {/* Row 2: Category Pills & Counter */}
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pt-1">
-                  <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
+                  <div className="flex items-center gap-1.5 overflow-x-auto sm:flex-wrap pb-1 scrollbar-none">
                     {CATEGORIES_LIST.map((cat) => (
                       <button
                         key={cat}
                         onClick={() => setActiveCategory(cat)}
-                        className={`flex-shrink-0 px-2.5 py-1 rounded-lg text-xs font-medium transition-colors ${
+                        className={`flex-shrink-0 px-2.5 py-1 rounded-lg text-xs font-medium cursor-pointer transition-colors ${
                           activeCategory === cat
                             ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900 font-semibold shadow-sm'
-                            : 'bg-stone-100 dark:bg-slate-800/60 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
+                            : 'bg-stone-100 dark:bg-slate-800/60 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-stone-200/60'
                         }`}
                       >
                         {cat}

@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://lpu-ba-notes.vercel.app/sitemap.xml
