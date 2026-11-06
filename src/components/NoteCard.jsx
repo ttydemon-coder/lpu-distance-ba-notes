@@ -30,12 +30,12 @@ export default function NoteCard({
 
   const getCategoryBadgeClass = (category) => {
     switch (category) {
-      case 'Previous Year Papers (PYQ)':
+      case 'Real Exam Papers':
+        return 'bg-rose-100 text-rose-800 dark:bg-rose-950/60 dark:text-rose-300 border-rose-200 dark:border-rose-800/40';
+      case 'Sample Question Papers':
         return 'bg-purple-100 text-purple-800 dark:bg-purple-950/60 dark:text-purple-300 border-purple-200 dark:border-purple-800/40';
-      case 'Syllabus & Blueprint':
+      case 'Book PDFs':
         return 'bg-blue-100 text-blue-800 dark:bg-blue-950/60 dark:text-blue-300 border-blue-200 dark:border-blue-800/40';
-      case 'Assignment Solution':
-        return 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800/40';
       default:
         return 'bg-orange-100 text-orange-800 dark:bg-orange-950/60 dark:text-orange-300 border-orange-200 dark:border-orange-800/40';
     }
@@ -66,7 +66,7 @@ export default function NoteCard({
                 e.stopPropagation();
                 onToggleBookmark(note.id);
               }}
-              title={isBookmarked ? "Remove Bookmark" : "Save Note"}
+              title={isBookmarked ? "Remove Bookmark" : "Save Material"}
               className={`p-1.5 rounded-lg transition-colors ${
                 isBookmarked 
                   ? 'text-orange-600 bg-orange-50 dark:bg-orange-950/50' 
@@ -77,7 +77,7 @@ export default function NoteCard({
             </button>
             <button
               onClick={handleShare}
-              title="Share Note"
+              title="Share"
               className="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-stone-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
             >
               {copied ? <Check className="w-4 h-4 text-emerald-500" /> : <Share2 className="w-4 h-4" />}

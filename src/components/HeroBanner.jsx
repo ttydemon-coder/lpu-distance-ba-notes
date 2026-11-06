@@ -44,7 +44,7 @@ export default function HeroBanner({
             </span>
           </h1>
           <p className="mt-2 text-xs sm:text-sm text-slate-600 dark:text-slate-400 font-normal leading-relaxed max-w-2xl">
-            High-yield study materials, SLM books, solved PYQs and continuous assessment assignments for LPU Distance students.
+            High-yield study notes, actual book PDFs, official sample question papers, and real examination papers for LPU Distance students.
           </p>
         </div>
 

@@ -18,7 +18,7 @@ export default function Footer() {
               </span>
             </div>
             <p className="text-xs text-slate-500 dark:text-slate-400 max-w-sm leading-relaxed">
-              Curated academic repository for Lovely Professional University Distance Education students pursuing Bachelor of Arts (B.A.). Fast, ad-free notes, SLM course books, solved PYQs, and CA assignments.
+              Curated academic repository for Lovely Professional University Distance Education students pursuing Bachelor of Arts (B.A.). Fast, ad-free study notes, actual book PDFs, official sample papers, and real examination questions.
             </p>
             <div className="flex items-center gap-2 text-xs text-slate-400">
               <Shield className="w-3.5 h-3.5 text-orange-500" />

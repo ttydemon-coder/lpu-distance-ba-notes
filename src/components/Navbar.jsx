@@ -49,7 +49,7 @@ export default function Navbar({
                 </span>
               </div>
               <p className="text-[10px] text-slate-500 dark:text-slate-400 hidden sm:block font-medium">
-                Notes, SLM Books, PYQs & CA Assignments
+                Notes, Book PDFs, Sample Papers & Real Exam Papers
               </p>
             </div>
           </div>

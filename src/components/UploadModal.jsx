@@ -145,7 +145,7 @@ export default function UploadModal({ isOpen, onClose, onNoteUploaded, subjectsL
                 Upload Study Material
               </h2>
               <p className="text-xs text-slate-500 dark:text-slate-400">
-                Notes, SLM Books, PYQs & CA Assignments
+                Notes, Book PDFs, Sample Papers & Real Exam Papers
               </p>
             </div>
           </div>
