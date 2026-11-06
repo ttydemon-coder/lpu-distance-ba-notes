@@ -220,14 +220,16 @@ export const INITIAL_NOTES = [
 export const SUBJECTS_LIST = [
   "All Subjects",
   "English Literature",
+  "Management",
+  "Punjabi",
+  "Sociology",
   "Political Science",
   "History",
-  "Sociology",
   "Economics",
   "Public Administration",
   "Computer Applications",
   "Environmental Studies",
-  "Hindi Literature"
+  "Combined / Real Exams"
 ];
 
 export const CATEGORIES_LIST = [
